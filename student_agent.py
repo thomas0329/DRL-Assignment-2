@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import copy
 import random
 import math
-
+from train_TD import TD_action_selection, patterns, NTupleApproximator
 
 class Game2048Env(gym.Env):
     def __init__(self):
@@ -230,10 +230,14 @@ class Game2048Env(gym.Env):
 
         # If the simulated board is different from the current board, the move is legal
         return not np.array_equal(self.board, temp_board)
+    
+
+value_approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights.pkl')
 
 def get_action(state, score):
     env = Game2048Env()
-    return random.choice([0, 1, 2, 3]) # Choose a random action
+    action = TD_action_selection(env, value_approximator, gamma=0.99)
+    return action # Choose a random action
     
     # You can submit this random agent to evaluate the performance of a purely random strategy.
 

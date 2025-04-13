@@ -150,7 +150,7 @@ def create_env_from_state(env, state, score):
   new_env.score = score
   return new_env
 
-def action_selection(env, approximator, gamma, epsilon):
+def TD_action_selection(env, approximator, gamma):
   # for simplicity, assume state transition is deterministic, though it's not
   # Q(s, a) = rt + gamma * V(next_state)
   legal_moves = [action for action in [0, 1, 2, 3] if env.is_move_legal(action)]
@@ -205,7 +205,7 @@ def td_learning(env, approximator, num_episodes=50000, alpha=0.01, gamma=0.99, e
             # Note: TD learning works fine on 2048 without explicit exploration, but you can still try some exploration methods.
 
             # epsilon greedy exploration seems to hinder training
-            action = action_selection(env, approximator, gamma, epsilon)  # from current state from env
+            action = TD_action_selection(env, approximator, gamma, epsilon)  # from current state from env
 
             next_state, new_score, done, _ = env.step(action) # change state of the env
 
@@ -281,4 +281,6 @@ env = Game2048Env()
 # However, to quickly verify that your implementation is working correctly, you can start by running it for 1,000 episodes before scaling up.
 
 final_scores = td_learning(env, approximator, num_episodes=100000, alpha=0.1, gamma=0.99, epsilon=0.1)
+
+# training takes 28 hours
 
