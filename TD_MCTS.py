@@ -93,14 +93,17 @@ class TD_MCTS:
         # the value of the expanded node
 
 
-    def backpropagate(self, node, rollout_reward):
-      # TODO: Propagate the obtained reward back up the tree.
-      # reward: rollout_reward
-      
+    def backpropagate(self, node, rollout_reward, selection_rwds):
+      # to be verified
+      # selection_rwds includes the reward from the expansion step
+      reward = rollout_reward
+
       # from the expanded node
       while node is not None:
         node.visits += 1
-        node.total_reward += rollout_reward
+        node.total_reward += reward
+        reward = reward * self.gamma + selection_rwds[-1]
+        selection_rwds.pop()
         node = node.parent
         
 
@@ -108,17 +111,23 @@ class TD_MCTS:
         # print('simulation starts')
         node = root
         sim_env = self.create_env_from_state(node.state, node.score)
-
+        prev_score = node.score
+        selection_rwds = []
         # TODO: Selection: Traverse the tree until reaching an unexpanded node.
-        # print('selection starts')
+        
         while node.fully_expanded():
           node = self.select_child(node)
           board, score, done, _ = sim_env.step(node.action)
-        # print('selection ends')
+          incremental_score = score - prev_score
+          selection_rwds.append(incremental_score)
+          prev_score = score
+        
 
         # TODO: Expansion: If the node is not terminal, expand an untried action.
         new_act = random.choice(node.untried_actions)
         board, score, done, _ = sim_env.step(new_act)
+        incremental_score = score - prev_score
+        selection_rwds.append(incremental_score)
         node.untried_actions.remove(new_act)
 
         # point the current node to the expanded node
@@ -131,7 +140,7 @@ class TD_MCTS:
         # print('rollout ends')
         # Backpropagate the obtained reward.
         # from the expanded node!
-        self.backpropagate(node, rollout_reward)
+        self.backpropagate(node, rollout_reward, selection_rwds)
         # print('simulation ends')
 
     def best_action_distribution(self, root):
