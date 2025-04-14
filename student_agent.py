@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import copy
 import random
 import math
-from train_TD import TD_action_selection, patterns, NTupleApproximator
+from TD_utils import TD_action_selection, patterns, NTupleApproximator
 
 class Game2048Env(gym.Env):
     def __init__(self):
@@ -231,8 +231,7 @@ class Game2048Env(gym.Env):
         # If the simulated board is different from the current board, the move is legal
         return not np.array_equal(self.board, temp_board)
     
-
-value_approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights.pkl')
+# value_approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights.pkl')
 
 def get_action(state, score):
     env = Game2048Env()
