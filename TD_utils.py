@@ -9,7 +9,7 @@ import math
 
 # Configure logging
 logging.basicConfig(
-    filename='logs/training.log', 
+    filename='logs/training_afterstate.log', 
     filemode='w',  # overwrite on each run, use 'a' to append
     format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -189,7 +189,7 @@ def TD_action_selection(env, approximator, gamma):
 
   return best_action
 
-def td_learning(env, approximator, num_episodes=50000, alpha=0.01, gamma=0.99, epsilon=0.1):
+def td_learning(env, approximator, exp, num_episodes=50000, alpha=0.01, gamma=0.99, epsilon=0.1):
     """
     Trains the 2048 agent using TD-Learning.
 
@@ -221,9 +221,8 @@ def td_learning(env, approximator, num_episodes=50000, alpha=0.01, gamma=0.99, e
 
             # epsilon greedy exploration seems to hinder training
             action = TD_action_selection(env, approximator, gamma)  # from current state from env
-
+            # afterstate
             next_state, new_score, done, _ = env.step(action) # change state of the env
-
 
             next_state = next_state.copy()
 

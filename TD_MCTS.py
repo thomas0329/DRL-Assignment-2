@@ -6,9 +6,10 @@ import numpy as np
 # Note: This MCTS implementation is almost identical to the previous one,
 # except for the rollout phase, which now incorporates the approximator.
 
-# Node for TD-MCTS using the TD-trained value approximator
+
 class TD_MCTS_Node:
-    def __init__(self, state, score, parent=None, action=None):
+    # an additional parameter env is passed
+    def __init__(self, env, state, score, parent=None, action=None):
         """
         state: current board state (numpy array)
         score: cumulative score at this node
@@ -29,6 +30,15 @@ class TD_MCTS_Node:
         # A node is fully expanded if no legal actions remain untried.
         return len(self.untried_actions) == 0
 
+class DecisionNode(TD_MCTS_Node):
+    def __init__(self, env, state, score, parent=None, action=None):
+        super().__init__(state, score, parent, action)
+        self.untried_actions = [a for a in range(4) if env.is_move_legal(a)]
+        
+# class ChanceNode(TD_MCTS_Node):
+    # to be figured out
+        
+  
 
 # TD-MCTS class utilizing a trained approximator for leaf evaluation
 class TD_MCTS:
@@ -108,7 +118,7 @@ class TD_MCTS:
         
 
     def run_simulation(self, root):
-        # print('simulation starts')
+        
         node = root
         sim_env = self.create_env_from_state(node.state, node.score)
         prev_score = node.score
@@ -117,12 +127,12 @@ class TD_MCTS:
         
         while node.fully_expanded():
           node = self.select_child(node)
+          # afterstate
           board, score, done, _ = sim_env.step(node.action)
           incremental_score = score - prev_score
           selection_rwds.append(incremental_score)
           prev_score = score
         
-
         # TODO: Expansion: If the node is not terminal, expand an untried action.
         new_act = random.choice(node.untried_actions)
         board, score, done, _ = sim_env.step(new_act)
@@ -135,13 +145,11 @@ class TD_MCTS:
         node = node.children[new_act]
 
         # Rollout: Simulate a random game from the expanded node.
-        # print('rollout starts')
+        
         rollout_reward = self.rollout(sim_env, self.rollout_depth)
-        # print('rollout ends')
-        # Backpropagate the obtained reward.
-        # from the expanded node!
+        
+        # Backpropagate the obtained reward from the expanded node
         self.backpropagate(node, rollout_reward, selection_rwds)
-        # print('simulation ends')
 
     def best_action_distribution(self, root):
         # root seems to be the current node

@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 import copy
 import random
 import math
-from TD_utils import TD_action_selection, patterns, NTupleApproximator
+from TD_utils import TD_action_selection
 
+# modify the env to output "afterstate" for both current state and next state
 class Game2048Env(gym.Env):
     def __init__(self):
         super(Game2048Env, self).__init__()
@@ -148,13 +149,14 @@ class Game2048Env(gym.Env):
             moved = False
 
         self.last_move_valid = moved  # Record if the move was valid
-
+        afterstate = self.board.copy()
         if moved:
             self.add_random_tile()
 
         done = self.is_game_over()
-
-        return self.board, self.score, done, {}
+        
+        # return self.board, self.score, done, {}
+        return afterstate, self.score, done, {}
 
     def render(self, mode="human", action=None):
         """

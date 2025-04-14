@@ -11,7 +11,7 @@ env = Game2048Env()
 # However, to quickly verify that your implementation is working correctly, you can start by running it for 1,000 episodes before scaling up.
 # Create log directory if not exists
 os.makedirs("logs", exist_ok=True)  
-
-final_scores = td_learning(env, approximator, num_episodes=100000, alpha=0.1, gamma=1, epsilon=0.1)
+exp = 'afterstate'
+final_scores = td_learning(env, approximator, exp, num_episodes=100000, alpha=0.1, gamma=1, epsilon=0.1)
 # training takes 28 hours
 
