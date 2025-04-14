@@ -31,5 +31,10 @@ jobs:
     - name: 3. Ensure env.so is executable
       run: chmod +x env.cpython-38-x86_64-linux-gnu.so
 
+    - name: 3.1 Install gdown and download weights
+      run: |
+        pip install gdown
+        gdown https://drive.google.com/file/d/1x1bozaYS4uU1X7yShbLc18LD77XRPil0/view?usp=share_link
+
     - name: 4. Run Evaluation
       run: python eval.py --token a91aae52cff9ef65932db06b150ffd47
