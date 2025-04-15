@@ -8,12 +8,12 @@ import numpy as np
 import math
 
 # Configure logging
-logging.basicConfig(
-    filename='logs/training_afterstate.log', 
-    filemode='w',  # overwrite on each run, use 'a' to append
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+# logging.basicConfig(
+#     filename='logs/training_afterstate.log', 
+#     filemode='w',  # overwrite on each run, use 'a' to append
+#     format='%(asctime)s - %(levelname)s - %(message)s',
+#     level=logging.INFO
+# )
 
 # pat1 = [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1)]
 # pat2 = [(1, 0), (1, 1), (1, 2), (1, 3), (2, 0), (2, 1)]
@@ -76,10 +76,11 @@ class NTupleApproximator:
             self.symmetry_patterns.append(syms)
 
         if os.path.exists(weights_path):
-          logging.info(f"Loading weights from {weights_path}...")
+          print(f"Loading weights from {weights_path}...")
+          
           self.load_weights(weights_path)
         else:
-          logging.info("No saved weights found. Starting fresh")
+          print('No saved weights found. Starting fresh')
           
 
     def save_weights(self, filename):
@@ -260,12 +261,13 @@ def td_learning(env, approximator, exp, num_episodes=50000, alpha=0.01, gamma=0.
         if (episode + 1) % 100 == 0:
             avg_score = np.mean(final_scores[-100:])
             success_rate = np.sum(success_flags[-100:]) / 100
-            logging.info(f"Episode {episode+1}/{num_episodes} | Avg Score: {avg_score:.2f} | Success Rate: {success_rate:.2f}")
+            print(f"Episode {episode+1}/{num_episodes} | Avg Score: {avg_score:.2f} | Success Rate: {success_rate:.2f}")
+            
         
             if avg_score > best_avg:
-                logging.info("new best, saving weights")
+                print('new best, saving weights')
                 best_avg = avg_score
-                approximator.save_weights("weights.pkl")
+                approximator.save_weights(f"weights_{exp}.pkl")
 
     return final_scores
 

@@ -149,14 +149,14 @@ class Game2048Env(gym.Env):
             moved = False
 
         self.last_move_valid = moved  # Record if the move was valid
-        afterstate = self.board.copy()
+        
         if moved:
             self.add_random_tile()
 
         done = self.is_game_over()
         
-        # return self.board, self.score, done, {}
-        return afterstate, self.score, done, {}
+        return self.board, self.score, done, {}
+        
 
     def render(self, mode="human", action=None):
         """
@@ -233,12 +233,36 @@ class Game2048Env(gym.Env):
         # If the simulated board is different from the current board, the move is legal
         return not np.array_equal(self.board, temp_board)
     
-approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='/content/weights.pkl')
+class myGame2048Env(Game2048Env):
+    def step(self, action):
+        """Execute one action"""
+        assert self.action_space.contains(action), "Invalid action"
 
+        if action == 0:
+            moved = self.move_up()
+        elif action == 1:
+            moved = self.move_down()
+        elif action == 2:
+            moved = self.move_left()
+        elif action == 3:
+            moved = self.move_right()
+        else:
+            moved = False
 
+        self.last_move_valid = moved  # Record if the move was valid
+        afterstate = self.board.copy()
+        if moved:
+            self.add_random_tile()
+
+        done = self.is_game_over()
+        
+        # return self.board, self.score, done, {}
+        return afterstate, self.score, done, {}
+        
+    
 
 def get_action(state, score):
-    env = Game2048Env()
+    env = myGame2048Env()
     td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=10, gamma=1)
     root = TD_MCTS_Node(state, score)
 
@@ -251,5 +275,32 @@ def get_action(state, score):
     return best_act # Choose a random action
     
     # You can submit this random agent to evaluate the performance of a purely random strategy.
+
+
+
+if __name__ == "__main__":
+    env = Game2048Env()
+    approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
+    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=10, gamma=1)
+    state = env.reset()
+
+    done = False
+    while not done:
+        # Create the root node from the current state
+        root = TD_MCTS_Node(env, state, env.score)
+
+        # Run multiple simulations to build the MCTS tree
+        for _ in range(td_mcts.iterations):
+            td_mcts.run_simulation(root)
+
+        # Select the best action (based on highest visit count)
+        best_act, _ = td_mcts.best_action_distribution(root)
+        print("TD-MCTS selected action:", best_act)
+
+        # Execute the selected action and update the state
+        state, reward, done, _ = env.step(best_act)
+        print(reward)
+
+    print("Game over, final score:", env.score)
 
 
