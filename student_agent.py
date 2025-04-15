@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import copy
 import random
 import math
-from TD_utils import TD_action_selection
-
+from TD_MCTS import TD_MCTS, TD_MCTS_Node
+from TD_utils import NTupleApproximator, patterns
 # modify the env to output "afterstate" for both current state and next state
 class Game2048Env(gym.Env):
     def __init__(self):
@@ -233,12 +233,22 @@ class Game2048Env(gym.Env):
         # If the simulated board is different from the current board, the move is legal
         return not np.array_equal(self.board, temp_board)
     
-# value_approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights.pkl')
+approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='/content/weights.pkl')
+
+
 
 def get_action(state, score):
     env = Game2048Env()
-    action = TD_action_selection(env, value_approximator, gamma=0.99)
-    return action # Choose a random action
+    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=10, gamma=1)
+    root = TD_MCTS_Node(state, score)
+
+    # Run multiple simulations to build the MCTS tree
+    for _ in range(td_mcts.iterations):
+        td_mcts.run_simulation(root)
+
+    best_act, _ = td_mcts.best_action_distribution(root)
+
+    return best_act # Choose a random action
     
     # You can submit this random agent to evaluate the performance of a purely random strategy.
 
