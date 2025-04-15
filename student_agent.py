@@ -281,7 +281,7 @@ def get_action(state, score):
 if __name__ == "__main__":
     env = Game2048Env()
     approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
-    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=10, gamma=1)
+    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
     state = env.reset()
 
     done = False
@@ -302,5 +302,6 @@ if __name__ == "__main__":
         print(reward)
 
     print("Game over, final score:", env.score)
+    
 
 

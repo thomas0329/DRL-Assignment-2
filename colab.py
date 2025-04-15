@@ -4,6 +4,7 @@ import math
 import numpy as np
 from student_agent import Game2048Env
 from TD_utils import NTupleApproximator, patterns
+
 # Note: This MCTS implementation is almost identical to the previous one,
 # except for the rollout phase, which now incorporates the approximator.
 
@@ -54,6 +55,9 @@ class TD_MCTS:
 
         for action, child in node.children.items():
           Q = child.total_reward / child.visits
+          Q = Q / 2500
+        #   print('Q', Q)
+        #   print('explore', self.c * math.sqrt(np.log(node.visits) / child.visits))
           uct = Q + self.c * math.sqrt(np.log(node.visits) / child.visits)
           if uct > best_uct:
             best_uct = uct
@@ -97,7 +101,7 @@ class TD_MCTS:
     # def backpropagate(self, node, reward):
     #     # TODO: Propagate the obtained reward back up the tree.
     #     # reward: rollout_reward
-
+        
     #     # from the expanded node
     #     while node is not None:
     #       node.visits += 1
@@ -125,23 +129,23 @@ class TD_MCTS:
         # print('simulation starts')
         node = root
         sim_env = self.create_env_from_state(node.state, node.score)
-
-        # TODO: Selection: Traverse the tree until reaching an unexpanded node.
         selection_rwds = []
         prev_score = node.score
-        
+        # TODO: Selection: Traverse the tree until reaching an unexpanded node.
+        # print('selection starts')
         while node.fully_expanded():
           node = self.select_child(node)
           board, score, done, _ = sim_env.step(node.action)
           selection_rwds.append(score - prev_score)
           prev_score = score
+        # print('selection ends')
 
         # TODO: Expansion: If the node is not terminal, expand an untried action.
         new_act = random.choice(node.untried_actions)
         board, score, done, _ = sim_env.step(new_act)
-        node.untried_actions.remove(new_act)
         selection_rwds.append(score - prev_score)
         prev_score = score
+        node.untried_actions.remove(new_act)
 
         # point the current node to the expanded node
         node.children[new_act] = TD_MCTS_Node(board, score, parent=node, action=new_act)
@@ -174,12 +178,11 @@ class TD_MCTS:
         # the target_distribution used by the policy approximator
         # the visit distr for each action
 
-
 env = Game2048Env()
 
 approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
 
-td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=0, gamma=1)
+td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
 
 state = env.reset()
 # env.render()
@@ -203,4 +206,6 @@ while not done:
     # env.render(action=best_act)
 
 print("Game over, final score:", env.score)
-# 12248
+
+# 25281 avg 
+# baseline 24127.08
