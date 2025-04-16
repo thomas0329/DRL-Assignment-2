@@ -2,7 +2,7 @@ import copy
 import random
 import math
 import numpy as np
-from student_agent import Game2048Env
+# from student_agent import Game2048Env
 from TD_utils import NTupleApproximator, patterns
 
 # Note: This MCTS implementation is almost identical to the previous one,
@@ -201,14 +201,14 @@ def play(env, td_mcts):
 
     print("Game over, final score:", env.score)
 
-env = Game2048Env()
+# env = Game2048Env()
 
-approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_30000.pkl')
+# approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_30000.pkl')
 
-td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
+# td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
 
-for _ in range(3):
-   play(env, td_mcts)
+# for _ in range(3):
+#    play(env, td_mcts)
 
 # 25281 avg 
 # baseline 24127.08

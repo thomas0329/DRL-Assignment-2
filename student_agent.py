@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import copy
 import random
 import math
-from TD_MCTS import TD_MCTS, TD_MCTS_Node
-from TD_utils import NTupleApproximator, patterns
+from TDMCTS import TD_MCTS, TD_MCTS_Node
+from TD_utils import NTupleApproximator, patterns, create_env_from_state
 # modify the env to output "afterstate" for both current state and next state
 class Game2048Env(gym.Env):
     def __init__(self):
@@ -259,12 +259,17 @@ class myGame2048Env(Game2048Env):
         # return self.board, self.score, done, {}
         return afterstate, self.score, done, {}
         
-    
+
+approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
+
 
 def get_action(state, score):
-    env = myGame2048Env()
-    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=10, gamma=1)
-    root = TD_MCTS_Node(state, score)
+    # env = Game2048Env()
+    
+    env = create_env_from_state(Game2048Env(), state, score)
+    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
+
+    root = TD_MCTS_Node(env, state, score)
 
     # Run multiple simulations to build the MCTS tree
     for _ in range(td_mcts.iterations):
@@ -280,25 +285,25 @@ def get_action(state, score):
 
 if __name__ == "__main__":
     env = Game2048Env()
-    approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
-    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
+    # approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
+    # td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
     state = env.reset()
 
     done = False
     while not done:
         # Create the root node from the current state
-        root = TD_MCTS_Node(env, state, env.score)
+        action = get_action(state, env.score)
+        # root = TD_MCTS_Node(env, state, env.score)
 
         # Run multiple simulations to build the MCTS tree
-        for _ in range(td_mcts.iterations):
-            td_mcts.run_simulation(root)
-
+        # for _ in range(td_mcts.iterations):
+        #     td_mcts.run_simulation(root)
         # Select the best action (based on highest visit count)
-        best_act, _ = td_mcts.best_action_distribution(root)
-        print("TD-MCTS selected action:", best_act)
+        # best_act, _ = td_mcts.best_action_distribution(root)
+        # print("TD-MCTS selected action:", best_act)
 
         # Execute the selected action and update the state
-        state, reward, done, _ = env.step(best_act)
+        state, reward, done, _ = env.step(action)
         print(reward)
 
     print("Game over, final score:", env.score)
