@@ -3,4 +3,4 @@ requests
 argparse
 torch
 matplotlib
-numpy
+numpy==1.24.4

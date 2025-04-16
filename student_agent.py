@@ -260,7 +260,7 @@ class myGame2048Env(Game2048Env):
         return afterstate, self.score, done, {}
         
 
-approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
+approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_compatible.pkl')
 
 
 def get_action(state, score):
