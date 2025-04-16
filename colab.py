@@ -10,7 +10,7 @@ from TD_utils import NTupleApproximator, patterns
 
 # Node for TD-MCTS using the TD-trained value approximator
 class TD_MCTS_Node:
-    def __init__(self, state, score, parent=None, action=None):
+    def __init__(self, env, state, score, parent=None, action=None):
         """
         state: current board state (numpy array)
         score: cumulative score at this node
@@ -55,9 +55,9 @@ class TD_MCTS:
 
         for action, child in node.children.items():
           Q = child.total_reward / child.visits
-          Q = Q / 2500
-        #   print('Q', Q)
-        #   print('explore', self.c * math.sqrt(np.log(node.visits) / child.visits))
+          Q = Q / 2000
+          # print('Q', Q)
+          # print('explore', self.c * math.sqrt(np.log(node.visits) / child.visits))
           uct = Q + self.c * math.sqrt(np.log(node.visits) / child.visits)
           if uct > best_uct:
             best_uct = uct
@@ -148,7 +148,7 @@ class TD_MCTS:
         node.untried_actions.remove(new_act)
 
         # point the current node to the expanded node
-        node.children[new_act] = TD_MCTS_Node(board, score, parent=node, action=new_act)
+        node.children[new_act] = TD_MCTS_Node(self.env, board, score, parent=node, action=new_act)
         node = node.children[new_act]
 
         # Rollout: Simulate a random game from the expanded node.
@@ -178,34 +178,40 @@ class TD_MCTS:
         # the target_distribution used by the policy approximator
         # the visit distr for each action
 
+def play(env, td_mcts):
+    state = env.reset()
+
+    done = False
+    while not done:
+        # Create the root node from the current state
+        root = TD_MCTS_Node(env, state, env.score)
+
+        # Run multiple simulations to build the MCTS tree
+        for _ in range(td_mcts.iterations):
+            td_mcts.run_simulation(root)
+
+        # Select the best action (based on highest visit count)
+        best_act, _ = td_mcts.best_action_distribution(root)
+        # print("TD-MCTS selected action:", best_act)
+
+        # Execute the selected action and update the state
+        state, reward, done, _ = env.step(best_act)
+        # print(reward)
+        # env.render(action=best_act)
+
+    print("Game over, final score:", env.score)
+
 env = Game2048Env()
 
-approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
+approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_30000.pkl')
 
 td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
 
-state = env.reset()
-# env.render()
-
-done = False
-while not done:
-    # Create the root node from the current state
-    root = TD_MCTS_Node(state, env.score)
-
-    # Run multiple simulations to build the MCTS tree
-    for _ in range(td_mcts.iterations):
-        td_mcts.run_simulation(root)
-
-    # Select the best action (based on highest visit count)
-    best_act, _ = td_mcts.best_action_distribution(root)
-    print("TD-MCTS selected action:", best_act)
-
-    # Execute the selected action and update the state
-    state, reward, done, _ = env.step(best_act)
-    print(reward)
-    # env.render(action=best_act)
-
-print("Game over, final score:", env.score)
+for _ in range(3):
+   play(env, td_mcts)
 
 # 25281 avg 
 # baseline 24127.08
+
+# 30,641 avg
+# baseline about 30000
