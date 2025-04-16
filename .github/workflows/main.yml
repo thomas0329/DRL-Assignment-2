@@ -34,7 +34,8 @@ jobs:
     - name: 3.1 Install gdown and download weights
       run: |
         pip install gdown
-        gdown --id 18akPkmO15bbP2fctH5xEnGSJtX4sn_1p -O weights_.pkl
+        gdown --id 1cYE5SXLTp1xD6z7E7ofyKApNY9ZdzF60 -O weights_.pkl
+        
 
     - name: 4. Run Evaluation
       run: python eval.py --token a91aae52cff9ef65932db06b150ffd47
