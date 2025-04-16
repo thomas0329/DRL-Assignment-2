@@ -260,6 +260,7 @@ class myGame2048Env(Game2048Env):
         return afterstate, self.score, done, {}
         
 
+
 approximator = NTupleApproximator(board_size=4, patterns=patterns, weights_path='weights_.pkl')
 
 
@@ -267,7 +268,7 @@ def get_action(state, score):
     # env = Game2048Env()
     
     env = create_env_from_state(Game2048Env(), state, score)
-    td_mcts = TD_MCTS(env, approximator, iterations=50, exploration_constant=1.41, rollout_depth=2, gamma=1)
+    td_mcts = TD_MCTS(env, approximator, iterations=75, exploration_constant=1.41, rollout_depth=2, gamma=1)
 
     root = TD_MCTS_Node(env, state, score)
 
@@ -293,18 +294,8 @@ if __name__ == "__main__":
     while not done:
         # Create the root node from the current state
         action = get_action(state, env.score)
-        # root = TD_MCTS_Node(env, state, env.score)
-
-        # Run multiple simulations to build the MCTS tree
-        # for _ in range(td_mcts.iterations):
-        #     td_mcts.run_simulation(root)
-        # Select the best action (based on highest visit count)
-        # best_act, _ = td_mcts.best_action_distribution(root)
-        # print("TD-MCTS selected action:", best_act)
-
-        # Execute the selected action and update the state
         state, reward, done, _ = env.step(action)
-        print(reward)
+        
 
     print("Game over, final score:", env.score)
     
